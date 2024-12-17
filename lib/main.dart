@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
+
 void main() async {
   // firebase初期化
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +27,9 @@ void main() async {
     final token = await messaging.getToken();
     print("FCM Token: $token");
   }
+
+  // バックグランド状態でPush通知を受け取る
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
