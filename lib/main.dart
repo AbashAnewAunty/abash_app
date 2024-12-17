@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -8,6 +9,19 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  final messaging = FirebaseMessaging.instance;
+  await messaging.requestPermission(provisional: false);
+
+  // iOSの場合は[getAPNSToken]の呼び出しが必要
+  // XCode > Capability からPush Notificationsを有効にすることを忘れないこと
+  final apnsToken = await messaging.getAPNSToken();
+  if (apnsToken != null) {
+    // APNS token is available, make FCM plugin API requests...
+    final token = await messaging.getToken();
+    print("FCM Token: $token");
+  }
+
   runApp(const MyApp());
 }
 
