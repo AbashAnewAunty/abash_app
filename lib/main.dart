@@ -6,9 +6,9 @@ import 'firebase_options.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
   print("Handling a background message: ${message.messageId}");
 
   final database = AppDatabase();
@@ -79,14 +79,45 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _future = _getDatabaseTexts();
+    _setupInteractedMessage();
   }
 
   Future<List<NoticeItem>> _getDatabaseTexts() async {
     final database = AppDatabase();
-
     await Future.delayed(const Duration(milliseconds: 500));
-
     return await database.select(database.noticeItems).get();
+  }
+
+  Future<void> _setupInteractedMessage() async {
+    // kill状態からpush通知をタップして起動した場合の処理
+    RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _handleMessageFromTerminated(initialMessage);
+    }
+    // バックグラウンド状態からpush通知をタップしてフォアグランドに戻った場合の処理
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageFromBackgorund);
+  }
+
+  void _handleMessageFromTerminated(RemoteMessage message) {
+    print("handle message");
+    final database = AppDatabase();
+    database.into(database.noticeItems).insert(
+          NoticeItemsCompanion.insert(
+            title: "open from terminated",
+            descriptions: "open from terminated",
+          ),
+        );
+  }
+
+  void _handleMessageFromBackgorund(RemoteMessage message) {
+    print("handle message");
+    final database = AppDatabase();
+    database.into(database.noticeItems).insert(
+          NoticeItemsCompanion.insert(
+            title: "open from background",
+            descriptions: "open from background",
+          ),
+        );
   }
 
   @override
