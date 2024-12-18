@@ -86,6 +86,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _setupInteractedMessage() async {
+    // フォアグランド時の処理
+    FirebaseMessaging.onMessage.listen(_handleMessageFromForeground);
     // kill状態からpush通知をタップして起動した場合の処理
     RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
@@ -93,6 +95,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     // バックグラウンド状態からpush通知をタップしてフォアグランドに戻った場合の処理
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageFromBackgorund);
+  }
+
+  void _handleMessageFromForeground(RemoteMessage message) {
+    print("handle message forground");
   }
 
   void _handleMessageFromTerminated(RemoteMessage message) {
