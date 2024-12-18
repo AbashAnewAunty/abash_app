@@ -40,6 +40,13 @@ void main() async {
   // バックグランド状態でPush通知を受け取る
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
+  // iOSファアグランド時のpush通知処理
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
   runApp(const MyApp());
 }
 
@@ -99,6 +106,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   void _handleMessageFromForeground(RemoteMessage message) {
     print("handle message forground");
+    print("title: ${message.notification?.title}");
+    message.data.keys.toList().map((key) => print(key));
+    message.data.forEach((key, value) {
+      print("$key: $value");
+    });
+    // final database = AppDatabase();
+    // database.into(database.noticeItems).insert(
+    //       NoticeItemsCompanion.insert(
+    //         title: "open from terminated",
+    //         descriptions: "open from terminated",
+    //       ),
+    //     );
   }
 
   void _handleMessageFromTerminated(RemoteMessage message) {
